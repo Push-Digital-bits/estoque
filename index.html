@@ -135,6 +135,8 @@
   .carta[data-nivel="laranja"] .nivel{color:var(--laranja)}
   .carta[data-nivel="vermelho"] .nivel{color:var(--vermelho)}
   .carta[data-nivel="vermelho"]{border-color:rgba(239,74,82,.42)}
+  .carta{cursor:pointer;transition:border-color .18s}
+  .carta:hover,.carta:focus-visible{border-color:var(--ciano);outline:none}
 
   .mudou .qtd{animation:acende 1s ease-out}
   @keyframes acende{
@@ -218,6 +220,8 @@
   .mov .delta.entrada{color:var(--verde)}
   .mov .delta.saida{color:var(--laranja)}
 
+  .previa{height:9rem;border-radius:.625rem;background:#080C13 center/contain no-repeat;margin-top:.75rem;display:grid;place-items:center;border:1px solid var(--borda)}
+  .previa svg{width:4.5rem}
   .aviso{margin-top:1rem;padding:.8125rem .9375rem;font-size:.9375rem;border-left:3px solid var(--vermelho);background:rgba(239,74,82,.1)}
   .vazio{padding:3rem 0;color:var(--cinza);text-align:center}
 
@@ -301,6 +305,24 @@
   <div class="pe">
     <button class="fantasma" id="btCancelaNovo">Cancelar</button>
     <button class="cheia" id="btSalvaNovo">Cadastrar</button>
+  </div>
+</dialog>
+
+<dialog id="dlgEditar">
+  <div class="cabeca">
+    <h2 id="tituloEditar">EDITAR MODELO</h2>
+    <p>A quantidade não se mexe aqui. Ela vem das entradas e saídas.</p>
+  </div>
+  <div class="corpo">
+    <div class="previa" id="previa"></div>
+    <label class="campo"><span>Link da foto</span><input type="url" id="edImagem" placeholder="https://…"></label>
+    <label class="campo"><span>Nome do perfume</span><input type="text" id="edNome"></label>
+    <label class="campo"><span>Apelido</span><input type="text" id="edApelido"></label>
+    <label class="campo"><span>Avisar quando cair abaixo de</span><input type="number" id="edMinimo" min="0"></label>
+  </div>
+  <div class="pe">
+    <button class="fantasma" id="btCancelaEd">Cancelar</button>
+    <button class="cheia" id="btSalvaEd">Salvar</button>
   </div>
 </dialog>
 
@@ -443,6 +465,10 @@ function desenhar() {
      <div><b>${criticos.length}</b>críticos</div>`;
 
   $('conteudo').innerHTML = `<div class="grade">${estoque.map(carta).join('')}</div>`;
+  $('conteudo').querySelectorAll('.carta').forEach(el => {
+    el.onclick = () => abrirEdicao(el.dataset.id);
+    el.onkeydown = ev => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); abrirEdicao(el.dataset.id); } };
+  });
   anteriores = Object.fromEntries(estoque.map(p => [p.id, p.saldo]));
 }
 
@@ -453,7 +479,7 @@ function carta(p) {
     ? `<img src="${escapar(p.imagem)}" alt="${escapar(p.nome)}" loading="lazy">`
     : frasco(p.cor);
 
-  return `<article class="carta${mudou ? ' mudou' : ''}" data-nivel="${n.cor}">
+  return `<article class="carta${mudou ? ' mudou' : ''}" data-nivel="${n.cor}" data-id="${escapar(p.id)}" tabindex="0" role="button">
     <div class="foto" style="--cor:${escapar(p.cor)}">${foto}</div>
     <div class="dados">
       <div class="nome">${escapar(p.nome)}</div>
@@ -529,6 +555,50 @@ async function salvarNovo() {
     carregar(r.dados);
   } catch (e) { alert(e.message); }
   finally { bt.disabled = false; }
+}
+
+let editandoId = null;
+
+function abrirEdicao(id) {
+  const p = estoque.find(x => x.id === id);
+  if (!p) return;
+  editandoId = id;
+  $('tituloEditar').textContent = p.nome.toUpperCase();
+  $('edImagem').value = p.imagem || '';
+  $('edNome').value = p.nome;
+  $('edApelido').value = p.apelido || '';
+  $('edMinimo').value = p.minimo;
+  previa(p);
+  $('edImagem').oninput = () => previa({ ...p, imagem: $('edImagem').value.trim() });
+  $('dlgEditar').showModal();
+}
+
+function previa(p) {
+  const alvo = $('previa');
+  if (p.imagem) {
+    alvo.style.backgroundImage = `url('${p.imagem.replace(/'/g, "%27")}')`;
+    alvo.innerHTML = '';
+  } else {
+    alvo.style.backgroundImage = 'none';
+    alvo.innerHTML = frasco(p.cor);
+  }
+}
+
+async function salvarEdicao() {
+  const bt = $('btSalvaEd');
+  bt.disabled = true; bt.textContent = 'Salvando…';
+  try {
+    const r = await chamar('editarProduto', {
+      id: editandoId,
+      imagem: $('edImagem').value.trim(),
+      nome: $('edNome').value.trim(),
+      apelido: $('edApelido').value.trim(),
+      minimo: Number($('edMinimo').value) || 0
+    });
+    $('dlgEditar').close();
+    carregar(r.dados);
+  } catch (e) { alert(e.message); }
+  finally { bt.disabled = false; bt.textContent = 'Salvar'; }
 }
 
 function abrirMovs() {
@@ -648,6 +718,8 @@ $('btCancelaMov').onclick = () => $('dlgMovimento').close();
 $('btSalvaNovo').onclick  = salvarNovo;
 $('btCancelaNovo').onclick = () => $('dlgNovo').close();
 $('btFechaMovs').onclick  = () => $('dlgMovs').close();
+$('btSalvaEd').onclick    = salvarEdicao;
+$('btCancelaEd').onclick  = () => $('dlgEditar').close();
 
 $('btSalvaCfg').onclick = () => {
   CONFIG.url = $('cfgUrl').value.trim();
