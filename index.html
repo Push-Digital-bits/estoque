@@ -49,6 +49,7 @@
   }
   .urgente[hidden]{display:none}
   .urgente strong{font-family:'Chakra Petch',sans-serif;font-weight:700;letter-spacing:.02em;flex-shrink:0}
+  .urgente span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
   .urgente span{opacity:.92}
 
   /* --------------------------------------------------------------- topo */
@@ -74,6 +75,7 @@
   }
   .titulo p{font-size:.8125rem;color:var(--cinza);margin-top:.1875rem}
   .estado{font-size:.75rem;color:var(--cinza);text-align:right;flex-shrink:0}
+  .nome-bt{background:none;padding:.125rem 0;font-size:.75rem;color:var(--ciano);text-decoration:underline;display:inline}
 
   .resumo{
     display:flex;gap:1.5rem;flex-wrap:wrap;
@@ -219,10 +221,29 @@
   .aviso{margin-top:1rem;padding:.8125rem .9375rem;font-size:.9375rem;border-left:3px solid var(--vermelho);background:rgba(239,74,82,.1)}
   .vazio{padding:3rem 0;color:var(--cinza);text-align:center}
 
-  @media (max-width:26rem){
-    .grade{grid-template-columns:repeat(auto-fill,minmax(8rem,1fr));gap:.625rem}
-    .acoes button span{display:none}
-    .acoes button{padding:.75rem;width:3rem;height:3rem;border-radius:50%}
+  @media (max-width:40rem){
+    .folha{padding:.875rem}
+    .grade{grid-template-columns:repeat(2,1fr);gap:.625rem}
+    .foto{aspect-ratio:4/3}
+    .foto svg{width:34%}
+    .dados{padding:.5rem .5625rem .625rem}
+    .nome{font-size:.8125rem}
+    .apelido{font-size:.6875rem}
+    .medida{margin-top:.3125rem}
+    .qtd{font-size:1.25rem}
+    .nivel{font-size:.625rem;margin-top:.25rem}
+    .resumo{gap:.875rem;font-size:.75rem;padding:.625rem 0;margin-bottom:.875rem}
+    .resumo b{font-size:.9375rem}
+    .urgente{font-size:.8125rem;padding:.5rem .875rem;gap:.4375rem}
+    header{padding:1rem 0 .875rem;gap:.75rem}
+    .marca img{height:2.5rem}
+    .titulo h1{font-size:1.1875rem}
+    .titulo p{font-size:.6875rem}
+    .acoes,.historico-bt{bottom:.625rem}
+    .acoes{right:.625rem;gap:.375rem}
+    .historico-bt{left:.625rem}
+    .acoes button,.historico-bt{font-size:.8125rem;padding:.5rem .75rem;border-radius:.4375rem}
+    body{padding-bottom:9rem}
   }
   @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -240,7 +261,7 @@
       <h1>ESTOQUE</h1>
       <p>Domah comércio digital</p>
     </div>
-    <div class="estado" id="estado">carregando</div>
+    <div class="estado"><div id="estado">carregando</div><button class="nome-bt" id="quem" type="button"></button></div>
   </header>
   <div class="resumo" id="resumo" hidden></div>
   <div id="conteudo"><p class="vazio">Buscando o estoque…</p></div>
@@ -304,16 +325,31 @@
   <div class="pe"><button class="cheia" id="btSalvaCfg">Conectar</button></div>
 </dialog>
 
+<script src="config.js"></script>
 <script>
-// ═══════════════════════════════════════════════════════════════════════════
-//  PREENCHA AQUI ANTES DE SUBIR PARA O GITHUB
-// ═══════════════════════════════════════════════════════════════════════════
-const CONFIG = {
-  url: 'https://script.google.com/macros/s/AKfycbwDLVk-xPkOyvrYfjjG_tSyKvo2fP9JZRm9kx5aFLKsCPn4TtON5ALR18C8NVefC0UjAg/exec',
-  senha: '060927',
-  quem: 'Mateus'
-};
-// ═══════════════════════════════════════════════════════════════════════════
+// O endereço e a senha ficam no arquivo config.js, ao lado deste.
+// Assim dá para trocar o index.html sem precisar preencher nada de novo.
+const CONFIG = Object.assign({ url: '', senha: '', quem: '' }, window.CONFIG || {});
+
+/** Quem está mexendo agora. Fica gravado no aparelho, então cada um tem o seu. */
+let quemSou = CONFIG.quem;
+try { quemSou = localStorage.getItem('domah:quem') || quemSou; } catch (e) {}
+
+function definirQuem(forcar) {
+  if (quemSou && !forcar) return quemSou;
+  const dito = prompt('Quem está registrando? Esse nome aparece no histórico.', quemSou || '');
+  if (dito && dito.trim()) {
+    quemSou = dito.trim();
+    try { localStorage.setItem('domah:quem', quemSou); } catch (e) {}
+    mostrarQuem();
+  }
+  return quemSou;
+}
+
+function mostrarQuem() {
+  const alvo = $('quem');
+  alvo.textContent = quemSou || 'definir nome';
+}
 
 
 const $ = id => document.getElementById(id);
@@ -329,7 +365,7 @@ async function chamar(acao, extras = {}) {
       method: 'POST',
       signal: corte,
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ acao, senha: CONFIG.senha, quem: CONFIG.quem, ...extras })
+      body: JSON.stringify({ acao, senha: CONFIG.senha, quem: quemSou, ...extras })
     });
   } catch (falha) {
     throw new Error('Não consegui falar com a planilha. Confira o endereço no bloco CONFIG e se o script foi republicado.');
@@ -388,8 +424,11 @@ function desenhar() {
   const faixa = $('urgente');
   if (criticos.length) {
     faixa.hidden = false;
+    const mostra = criticos.slice(0, 3)
+      .map(p => escapar(p.nome) + ' (' + p.saldo + ')').join(' &nbsp;·&nbsp; ');
+    const resto = criticos.length - 3;
     faixa.innerHTML = `<strong>COMPRAR URGENTE</strong>
-      <span>${criticos.map(p => escapar(p.nome) + ' (' + p.saldo + ')').join(' &nbsp;·&nbsp; ')}</span>`;
+      <span>${mostra}${resto > 0 ? ` &nbsp;·&nbsp; e mais ${resto}` : ''}</span>`;
   } else {
     faixa.hidden = true;
   }
@@ -460,6 +499,7 @@ async function salvarMovimento() {
     .filter(i => i.quantidade > 0);
 
   if (!itens.length) { alert('Preencha ao menos uma quantidade.'); return; }
+  if (!definirQuem()) { alert('Preciso de um nome para registrar no histórico.'); return; }
 
   const bt = $('btSalvaMov');
   bt.disabled = true; bt.textContent = 'Salvando…';
@@ -617,11 +657,14 @@ $('btSalvaCfg').onclick = () => {
   carregar();
 };
 
+mostrarQuem();
+$('quem').onclick = () => definirQuem(true);
+
 if (CONFIG.url && CONFIG.senha) {
   carregar();
 } else {
   $('estado').textContent = 'não conectado';
-  $('conteudo').innerHTML = '<p class="vazio">Falta conectar o painel à planilha.</p>';
+  $('conteudo').innerHTML = '<p class="vazio">Falta o arquivo config.js ao lado do index.html.</p>';
   $('dlgConfig').showModal();
 }
 </script>
