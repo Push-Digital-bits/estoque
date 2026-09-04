@@ -3,231 +3,305 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#241C2B">
+<meta name="theme-color" content="#05080D">
 <title>Domah — estoque</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&family=Chakra+Petch:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --papel:#FBFAF9;
-    --tinta:#241C2B;
-    --ameixa:#4A2F52;
-    --acafrao:#B8791C;
-    --resina:#9E3B26;
-    --linha:#E6E1E6;
-    --suave:#7A6E80;
+    --noite:#05080D;
+    --carta:rgba(255,255,255,.035);
+    --borda:rgba(41,168,240,.18);
+    --ciano:#29A8F0;
+    --ciano-luz:#7FD0FF;
+    --branco:#EAF2F9;
+    --cinza:#7286A0;
+    --verde:#21C08A;
+    --amarelo:#E9C93C;
+    --laranja:#F2892E;
+    --vermelho:#EF4A52;
   }
 
   *{box-sizing:border-box;margin:0;padding:0}
 
   body{
-    background:var(--papel);
-    color:var(--tinta);
+    background:var(--noite);
+    color:var(--branco);
     font-family:'Archivo',system-ui,sans-serif;
-    font-size:16px;
-    line-height:1.45;
+    font-size:16px;line-height:1.4;
     -webkit-font-smoothing:antialiased;
-    padding-bottom:6.5rem;
+    min-height:100vh;
+    padding-bottom:7rem;
   }
 
-  .folha{max-width:38rem;margin:0 auto;padding:1.5rem 1.25rem}
+  #teia{position:fixed;inset:0;z-index:0;pointer-events:none}
+  .folha{position:relative;z-index:1;max-width:74rem;margin:0 auto;padding:1.25rem}
 
-  /* ------------------------------------------------------------- cabeçalho */
+  /* ---------------------------------------------------------- faixa urgente */
+  .urgente{
+    position:sticky;top:0;z-index:5;
+    background:linear-gradient(90deg,#7A1218,#EF4A52 45%,#7A1218);
+    color:#fff;font-size:.9375rem;font-weight:500;
+    padding:.6875rem 1.25rem;
+    display:flex;gap:.625rem;align-items:baseline;
+    box-shadow:0 .5rem 1.5rem rgba(239,74,82,.25);
+  }
+  .urgente[hidden]{display:none}
+  .urgente strong{font-family:'Chakra Petch',sans-serif;font-weight:700;letter-spacing:.02em;flex-shrink:0}
+  .urgente span{opacity:.92}
+
+  /* --------------------------------------------------------------- topo */
   header{
-    display:flex;align-items:baseline;justify-content:space-between;
-    gap:1rem;padding-bottom:1.25rem;border-bottom:2px solid var(--tinta);
+    display:flex;align-items:center;gap:1rem;
+    padding:1.5rem 0 1.25rem;
   }
-  h1{
-    font-family:'Fraunces',Georgia,serif;
-    font-weight:700;font-size:1.75rem;letter-spacing:-.01em;
-    font-variation-settings:'SOFT' 0,'WONK' 1;
+  .marca{position:relative;flex-shrink:0}
+  .marca img{display:block;height:3.25rem;width:auto}
+  .marca::after{
+    content:'';position:absolute;inset:-35% -20%;z-index:-1;
+    background:radial-gradient(ellipse at 50% 50%,rgba(41,168,240,.32),transparent 68%);
+    animation:respira 5.5s ease-in-out infinite;
   }
-  .estado{font-size:.8125rem;color:var(--suave);text-align:right;flex-shrink:0}
+  @keyframes respira{
+    0%,100%{opacity:.5;transform:scale(.94)}
+    50%    {opacity:1;transform:scale(1.06)}
+  }
+  .titulo{flex:1;min-width:0}
+  .titulo h1{
+    font-family:'Chakra Petch',sans-serif;font-weight:700;
+    font-size:1.5rem;letter-spacing:.06em;line-height:1;
+  }
+  .titulo p{font-size:.8125rem;color:var(--cinza);margin-top:.1875rem}
+  .estado{font-size:.75rem;color:var(--cinza);text-align:right;flex-shrink:0}
 
-  /* ------------------------------------------------------------ repor logo */
-  .repor{
-    margin-top:1.25rem;padding:.875rem 1rem;
-    border-left:4px solid var(--acafrao);
-    background:#FDF6E9;
-    font-size:.9375rem;
+  .resumo{
+    display:flex;gap:1.5rem;flex-wrap:wrap;
+    padding:.875rem 0;margin-bottom:1.25rem;
+    border-top:1px solid var(--borda);border-bottom:1px solid var(--borda);
+    font-size:.875rem;color:var(--cinza);
   }
-  .repor b{font-weight:600}
-  .repor.zerado{border-left-color:var(--resina);background:#FBEDE9}
+  .resumo b{
+    font-family:'Chakra Petch',sans-serif;font-size:1.125rem;font-weight:700;
+    color:var(--branco);margin-right:.3125rem;
+  }
 
-  /* ---------------------------------------------------------------- lista */
-  .lista{margin-top:1.5rem}
-  .item{
-    display:flex;align-items:center;gap:.875rem;
-    padding:.8125rem 0;border-bottom:1px solid var(--linha);
+  /* --------------------------------------------------------------- grade */
+  .grade{
+    display:grid;gap:.875rem;
+    grid-template-columns:repeat(auto-fill,minmax(9.5rem,1fr));
   }
-  .marca{width:4px;height:2.25rem;border-radius:2px;flex-shrink:0}
-  .quem{flex:1;min-width:0}
+  .carta{
+    background:var(--carta);
+    border:1px solid var(--borda);
+    border-radius:.875rem;overflow:hidden;
+    backdrop-filter:blur(6px);
+    display:flex;flex-direction:column;
+  }
+  .foto{
+    aspect-ratio:1;position:relative;
+    background:radial-gradient(circle at 50% 42%,color-mix(in srgb,var(--cor) 34%,transparent),transparent 70%),#080C13;
+    display:grid;place-items:center;overflow:hidden;
+  }
+  .foto img{width:100%;height:100%;object-fit:cover}
+  .foto svg{width:44%;height:auto;opacity:.85}
+  .dados{padding:.6875rem .75rem .8125rem;display:flex;flex-direction:column;gap:.125rem;flex:1}
   .nome{
-    font-family:'Fraunces',Georgia,serif;
-    font-size:1.0625rem;font-weight:600;line-height:1.2;
-    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    font-family:'Chakra Petch',sans-serif;font-weight:600;
+    font-size:.9375rem;line-height:1.15;
   }
-  .apelido{font-size:.8125rem;color:var(--suave)}
-  .saldo{
-    font-family:'Fraunces',Georgia,serif;
-    font-size:1.5rem;font-weight:600;font-variant-numeric:tabular-nums;
-    min-width:2.75rem;text-align:right;
+  .apelido{font-size:.75rem;color:var(--cinza)}
+  .medida{display:flex;align-items:baseline;gap:.25rem;margin-top:.4375rem}
+  .qtd{
+    font-family:'Chakra Petch',sans-serif;font-weight:700;
+    font-size:1.75rem;line-height:1;font-variant-numeric:tabular-nums;
   }
-  .item[data-nivel="baixo"] .saldo{color:var(--acafrao)}
-  .item[data-nivel="zero"] .saldo{color:var(--resina)}
-  .saldo.mudou{animation:pisca .9s ease-out}
-  @keyframes pisca{
-    0%{background:#F2E4C9;box-shadow:0 0 0 .375rem #F2E4C9}
-    100%{background:transparent;box-shadow:0 0 0 .375rem transparent}
+  .un{font-size:.75rem;color:var(--cinza)}
+  .termo{
+    height:.3125rem;border-radius:.25rem;margin-top:.5rem;
+    background:rgba(255,255,255,.08);overflow:hidden;
+  }
+  .termo i{display:block;height:100%;border-radius:.25rem;transition:width .5s ease}
+  .nivel{font-size:.6875rem;margin-top:.3125rem;font-weight:500}
+
+  .carta[data-nivel="verde"]   .termo i{background:var(--verde)}
+  .carta[data-nivel="amarelo"] .termo i{background:var(--amarelo)}
+  .carta[data-nivel="laranja"] .termo i{background:var(--laranja)}
+  .carta[data-nivel="vermelho"] .termo i{background:var(--vermelho)}
+  .carta[data-nivel="verde"]   .nivel{color:var(--verde)}
+  .carta[data-nivel="amarelo"] .nivel{color:var(--amarelo)}
+  .carta[data-nivel="laranja"] .nivel{color:var(--laranja)}
+  .carta[data-nivel="vermelho"] .nivel{color:var(--vermelho)}
+  .carta[data-nivel="vermelho"]{border-color:rgba(239,74,82,.42)}
+
+  .mudou .qtd{animation:acende 1s ease-out}
+  @keyframes acende{
+    0%{color:var(--ciano-luz);text-shadow:0 0 1.25rem var(--ciano)}
+    100%{color:var(--branco);text-shadow:none}
   }
 
   /* --------------------------------------------------------------- ações */
-  .barra{
-    position:fixed;left:0;right:0;bottom:0;
-    background:var(--papel);border-top:1px solid var(--linha);
-    padding:.75rem 1.25rem calc(.75rem + env(safe-area-inset-bottom));
+  .acoes{
+    position:fixed;right:1rem;bottom:1rem;z-index:6;
+    display:flex;flex-direction:column;gap:.5rem;align-items:stretch;
+    padding-bottom:env(safe-area-inset-bottom);
   }
-  .barra .folha{padding:0;display:flex;gap:.625rem}
+  .historico-bt{
+    position:fixed;left:1rem;bottom:1rem;z-index:6;
+    margin-bottom:env(safe-area-inset-bottom);
+  }
   button{
-    font-family:'Archivo',sans-serif;font-size:1rem;font-weight:500;
-    border:none;border-radius:.375rem;padding:.8125rem 1rem;cursor:pointer;
+    font-family:'Archivo',sans-serif;font-size:.9375rem;font-weight:500;
+    border:none;border-radius:.5rem;padding:.75rem 1rem;cursor:pointer;
+    display:flex;align-items:center;gap:.5rem;justify-content:center;
+    color:var(--branco);
   }
-  .primaria{flex:1;background:var(--ameixa);color:#fff}
-  .secundaria{flex:1;background:transparent;color:var(--ameixa);box-shadow:inset 0 0 0 1.5px var(--ameixa)}
-  .discreta{background:transparent;color:var(--suave);text-decoration:underline;padding:.5rem 0;font-size:.875rem}
+  .cheia{background:var(--ciano);color:#04121D;font-weight:600;box-shadow:0 .375rem 1.25rem rgba(41,168,240,.32)}
+  .vazada{background:rgba(5,8,13,.82);box-shadow:inset 0 0 0 1.5px var(--borda);backdrop-filter:blur(8px)}
+  .fantasma{background:rgba(5,8,13,.7);color:var(--cinza);box-shadow:inset 0 0 0 1px rgba(255,255,255,.09);backdrop-filter:blur(8px);font-size:.875rem;padding:.625rem .875rem}
   button:disabled{opacity:.45;cursor:default}
-  button:focus-visible,input:focus-visible{outline:2.5px solid var(--ameixa);outline-offset:2px}
+  button:focus-visible,input:focus-visible{outline:2.5px solid var(--ciano-luz);outline-offset:2px}
+  button svg{width:1rem;height:1rem;flex-shrink:0}
 
   /* ------------------------------------------------------------- painéis */
   dialog{
-    border:none;padding:0;background:var(--papel);color:var(--tinta);
-    width:min(38rem,100%);max-height:88vh;
-    margin:auto auto 0;border-radius:.75rem .75rem 0 0;
+    border:none;padding:0;width:min(34rem,100%);max-height:90vh;
+    margin:auto auto 0;border-radius:1rem 1rem 0 0;
+    background:#080C14;color:var(--branco);
+    box-shadow:0 0 0 1px var(--borda),0 -1.5rem 4rem rgba(0,0,0,.7);
   }
-  dialog::backdrop{background:rgba(36,28,43,.45)}
+  dialog::backdrop{background:rgba(2,4,8,.72);backdrop-filter:blur(3px)}
   .cabeca{
-    position:sticky;top:0;background:var(--papel);z-index:1;
-    padding:1.25rem 1.25rem .75rem;border-bottom:1px solid var(--linha);
+    position:sticky;top:0;z-index:1;background:#080C14;
+    padding:1.25rem 1.25rem .875rem;border-bottom:1px solid var(--borda);
   }
-  .cabeca h2{
-    font-family:'Fraunces',Georgia,serif;font-size:1.375rem;font-weight:600;
-  }
-  .cabeca p{font-size:.875rem;color:var(--suave);margin-top:.125rem}
-  .corpo{padding:.25rem 1.25rem 1.25rem;overflow-y:auto}
+  .cabeca h2{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:1.25rem;letter-spacing:.03em}
+  .cabeca p{font-size:.8125rem;color:var(--cinza);margin-top:.1875rem}
+  .corpo{padding:.5rem 1.25rem 1.25rem;overflow-y:auto}
   .pe{
-    position:sticky;bottom:0;background:var(--papel);
-    border-top:1px solid var(--linha);
+    position:sticky;bottom:0;background:#080C14;border-top:1px solid var(--borda);
     padding:.875rem 1.25rem calc(.875rem + env(safe-area-inset-bottom));
     display:flex;gap:.625rem;
   }
+  .pe button{flex:1}
 
   .contagem{
-    display:flex;align-items:center;gap:.875rem;
-    padding:.6875rem 0;border-bottom:1px solid var(--linha);
+    display:flex;align-items:center;gap:.75rem;
+    padding:.625rem 0;border-bottom:1px solid rgba(255,255,255,.06);
   }
-  .contagem .quem{flex:1}
-  .contagem .atual{font-size:.8125rem;color:var(--suave);min-width:3.5rem;text-align:right}
+  .selo{width:2.25rem;height:2.25rem;border-radius:.375rem;flex-shrink:0;background-size:cover;background-position:center}
+  .contagem .quem{flex:1;min-width:0}
+  .contagem .nome{font-size:.875rem}
+  .contagem .tem{font-size:.75rem;color:var(--cinza);white-space:nowrap}
   input[type="number"],input[type="text"],input[type="url"],input[type="password"]{
-    font-family:'Archivo',sans-serif;font-size:1rem;color:var(--tinta);
-    background:#fff;border:1.5px solid var(--linha);border-radius:.375rem;
-    padding:.5rem .625rem;
+    font-family:'Archivo',sans-serif;font-size:1rem;color:var(--branco);
+    background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.1);
+    border-radius:.375rem;padding:.5rem .625rem;
   }
-  input[type="number"]{width:4.5rem;text-align:center;font-variant-numeric:tabular-nums}
-  input[type="number"]:not(:placeholder-shown){border-color:var(--ameixa);font-weight:600}
-
-  .campo{display:block;margin-top:1rem}
-  .campo span{display:block;font-size:.875rem;color:var(--suave);margin-bottom:.3125rem}
+  input[type="number"]{width:4rem;text-align:center;font-variant-numeric:tabular-nums}
+  input[type="number"]:not(:placeholder-shown){border-color:var(--ciano);font-weight:600}
+  .campo{display:block;margin-top:.875rem}
+  .campo span{display:block;font-size:.8125rem;color:var(--cinza);margin-bottom:.3125rem}
   .campo input{width:100%}
 
-  /* ------------------------------------------------------------ histórico */
-  .historico{margin-top:2.5rem}
-  .historico h2{
-    font-family:'Fraunces',Georgia,serif;font-size:1.125rem;font-weight:600;
-    padding-bottom:.5rem;border-bottom:1px solid var(--linha);
+  .dia{
+    font-family:'Chakra Petch',sans-serif;font-weight:600;font-size:.8125rem;
+    color:var(--ciano);letter-spacing:.06em;
+    padding:.875rem 0 .375rem;
   }
-  .linha-hist{
-    display:flex;gap:.75rem;padding:.5rem 0;font-size:.875rem;
-    border-bottom:1px solid var(--linha);
-  }
-  .linha-hist time{color:var(--suave);min-width:6.5rem;flex-shrink:0}
-  .linha-hist .delta{font-weight:600;font-variant-numeric:tabular-nums;margin-left:auto}
-  .linha-hist .delta.entrada{color:var(--ameixa)}
-  .linha-hist .delta.saida{color:var(--resina)}
+  .mov{display:flex;align-items:center;gap:.625rem;padding:.4375rem 0;font-size:.875rem;border-bottom:1px solid rgba(255,255,255,.05)}
+  .mov time{color:var(--cinza);font-size:.75rem;min-width:2.75rem;flex-shrink:0;font-variant-numeric:tabular-nums}
+  .mov .quem-fez{color:var(--cinza);font-size:.75rem}
+  .mov .delta{margin-left:auto;font-family:'Chakra Petch',sans-serif;font-weight:700;font-variant-numeric:tabular-nums}
+  .mov .delta.entrada{color:var(--verde)}
+  .mov .delta.saida{color:var(--laranja)}
 
-  .aviso{
-    margin-top:1rem;padding:.75rem .875rem;font-size:.9375rem;
-    border-left:4px solid var(--resina);background:#FBEDE9;
-  }
-  .vazio{padding:2.5rem 0;color:var(--suave);text-align:center}
+  .aviso{margin-top:1rem;padding:.8125rem .9375rem;font-size:.9375rem;border-left:3px solid var(--vermelho);background:rgba(239,74,82,.1)}
+  .vazio{padding:3rem 0;color:var(--cinza);text-align:center}
 
+  @media (max-width:26rem){
+    .grade{grid-template-columns:repeat(auto-fill,minmax(8rem,1fr));gap:.625rem}
+    .acoes button span{display:none}
+    .acoes button{padding:.75rem;width:3rem;height:3rem;border-radius:50%}
+  }
   @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
 
-<!--
-  ANTES DE SUBIR PARA O GITHUB, preencha as duas linhas abaixo, no script.
-  Enquanto estiverem em branco, o painel pede os dados na tela.
--->
+<canvas id="teia"></canvas>
+
+<div class="urgente" id="urgente" hidden></div>
 
 <div class="folha">
   <header>
-    <h1>Estoque Domah</h1>
+    <div class="marca"><img id="logo" src="logo.png" alt="Domah"></div>
+    <div class="titulo">
+      <h1>ESTOQUE</h1>
+      <p>Domah comércio digital</p>
+    </div>
     <div class="estado" id="estado">carregando</div>
   </header>
-  <div id="conteudo">
-    <p class="vazio">Buscando o estoque…</p>
-  </div>
+  <div class="resumo" id="resumo" hidden></div>
+  <div id="conteudo"><p class="vazio">Buscando o estoque…</p></div>
 </div>
 
-<div class="barra" id="barra" hidden>
-  <div class="folha">
-    <button class="secundaria" id="btEntrada">Registrar entrada</button>
-    <button class="primaria" id="btSaida">Registrar saída</button>
-  </div>
+<button class="fantasma historico-bt" id="btMovs" hidden>Movimentações</button>
+
+<div class="acoes" id="acoes" hidden>
+  <button class="fantasma" id="btNovo"><span>Novo modelo</span></button>
+  <button class="vazada" id="btEntrada"><span>Entrada</span></button>
+  <button class="cheia" id="btSaida"><span>Saída</span></button>
 </div>
 
 <dialog id="dlgMovimento">
   <div class="cabeca">
-    <h2 id="tituloMov">Registrar saída</h2>
+    <h2 id="tituloMov">REGISTRAR SAÍDA</h2>
     <p id="subtituloMov">Preencha quanto saiu de cada modelo e salve tudo de uma vez.</p>
   </div>
   <div class="corpo" id="corpoMov"></div>
   <div class="pe">
-    <button class="secundaria" id="btCancelaMov">Cancelar</button>
-    <button class="primaria" id="btSalvaMov">Salvar</button>
+    <button class="fantasma" id="btCancelaMov">Cancelar</button>
+    <button class="cheia" id="btSalvaMov">Salvar</button>
   </div>
 </dialog>
 
 <dialog id="dlgNovo">
   <div class="cabeca">
-    <h2>Cadastrar modelo</h2>
-    <p>Ele aparece nas listas de entrada e saída na hora.</p>
+    <h2>NOVO MODELO</h2>
+    <p>Ele aparece na grade e nas listas de entrada e saída na hora.</p>
   </div>
   <div class="corpo">
     <label class="campo"><span>Nome do perfume</span><input type="text" id="novoNome" placeholder="Lattafa Khamrah"></label>
     <label class="campo"><span>Apelido, do jeito que vocês chamam</span><input type="text" id="novoApelido" placeholder="khamrah"></label>
+    <label class="campo"><span>Link da foto, se já tiver</span><input type="url" id="novaImagem" placeholder="https://…"></label>
     <label class="campo"><span>Avisar quando cair abaixo de</span><input type="number" id="novoMinimo" value="20" min="0"></label>
   </div>
   <div class="pe">
-    <button class="secundaria" id="btCancelaNovo">Cancelar</button>
-    <button class="primaria" id="btSalvaNovo">Cadastrar</button>
+    <button class="fantasma" id="btCancelaNovo">Cancelar</button>
+    <button class="cheia" id="btSalvaNovo">Cadastrar</button>
   </div>
+</dialog>
+
+<dialog id="dlgMovs">
+  <div class="cabeca">
+    <h2>MOVIMENTAÇÕES</h2>
+    <p>Tudo que entrou e saiu, do mais recente para o mais antigo.</p>
+  </div>
+  <div class="corpo" id="corpoMovs"></div>
+  <div class="pe"><button class="fantasma" id="btFechaMovs">Fechar</button></div>
 </dialog>
 
 <dialog id="dlgConfig">
   <div class="cabeca">
-    <h2>Conectar à planilha</h2>
+    <h2>CONECTAR</h2>
     <p>Cole o endereço que o Apps Script gerou ao publicar.</p>
   </div>
   <div class="corpo">
     <label class="campo"><span>Endereço do aplicativo web</span><input type="url" id="cfgUrl" placeholder="https://script.google.com/macros/s/…/exec"></label>
     <label class="campo"><span>Senha definida no código</span><input type="password" id="cfgSenha"></label>
   </div>
-  <div class="pe">
-    <button class="primaria" id="btSalvaCfg">Conectar</button>
-  </div>
+  <div class="pe"><button class="cheia" id="btSalvaCfg">Conectar</button></div>
 </dialog>
 
 <script>
@@ -235,122 +309,145 @@
 //  PREENCHA AQUI ANTES DE SUBIR PARA O GITHUB
 // ═══════════════════════════════════════════════════════════════════════════
 const CONFIG = {
-  url: 'https://script.google.com/macros/s/AKfycbwDLVk-xPkOyvrYfjjG_tSyKvo2fP9JZRm9kx5aFLKsCPn4TtON5ALR18C8NVefC0UjAg/exec', 
+  url: 'https://script.google.com/macros/s/AKfycbwDLVk-xPkOyvrYfjjG_tSyKvo2fP9JZRm9kx5aFLKsCPn4TtON5ALR18C8NVefC0UjAg/exec',
   senha: '060927',
-  quem: 'Mateus' 
+  quem: 'Mateus'
 };
 // ═══════════════════════════════════════════════════════════════════════════
 
+
 const $ = id => document.getElementById(id);
-let estoque = [];
-let historico = [];
-let saldosAnteriores = {};
+let estoque = [], historico = [], anteriores = {};
 
 // ------------------------------------------------------------------ conversa
 
 async function chamar(acao, extras = {}) {
-  const resposta = await fetch(CONFIG.url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body: JSON.stringify({ acao, senha: CONFIG.senha, quem: CONFIG.quem, ...extras })
-  });
+  const corte = AbortSignal.timeout ? AbortSignal.timeout(30000) : undefined;
+  let resposta;
+  try {
+    resposta = await fetch(CONFIG.url, {
+      method: 'POST',
+      signal: corte,
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ acao, senha: CONFIG.senha, quem: CONFIG.quem, ...extras })
+    });
+  } catch (falha) {
+    throw new Error('Não consegui falar com a planilha. Confira o endereço no bloco CONFIG e se o script foi republicado.');
+  }
   const dados = await resposta.json();
   if (!dados.ok) throw new Error(dados.erro || 'A planilha recusou o pedido.');
   return dados;
 }
 
-async function carregar(dadosProntos) {
+async function carregar(prontos) {
   try {
-    const dados = dadosProntos || (await chamar('estoque')).dados;
+    const dados = prontos || (await chamar('estoque')).dados;
     estoque = dados.produtos;
     historico = dados.movimentos;
     desenhar();
-    $('estado').textContent = 'atualizado ' + agoraCurto();
+    $('estado').textContent = 'atualizado ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
   } catch (erro) {
-    $('conteudo').innerHTML = `<div class="aviso">${escapar(erro.message)}</div>
-      <button class="discreta" onclick="dlgConfig.showModal()">Rever a conexão</button>`;
+    $('conteudo').innerHTML = `<div class="aviso">${escapar(erro.message)}</div>`;
     $('estado').textContent = 'sem conexão';
   }
 }
 
-// ------------------------------------------------------------------- desenho
+// ------------------------------------------------------------------ termômetro
+
+function nivelDe(p) {
+  if (p.saldo <= 0) return { cor: 'vermelho', texto: 'esgotado', fatia: 0 };
+  const razao = p.minimo > 0 ? p.saldo / p.minimo : 1;
+  const fatia = Math.max(6, Math.min(100, razao * 100));
+  if (razao >= 1)  return { cor: 'verde',    texto: 'estoque bom', fatia };
+  if (razao >= .6) return { cor: 'amarelo',  texto: 'atenção',     fatia };
+  if (razao >= .3) return { cor: 'laranja',  texto: 'acabando',    fatia };
+  return { cor: 'vermelho', texto: 'crítico', fatia };
+}
+
+function frasco(cor) {
+  return `<svg viewBox="0 0 40 64" fill="none" aria-hidden="true">
+    <rect x="15" y="2" width="10" height="8" rx="2" fill="${cor}" opacity=".9"/>
+    <path d="M12 14h16a6 6 0 0 1 6 6v34a8 8 0 0 1-8 8H14a8 8 0 0 1-8-8V20a6 6 0 0 1 6-6Z"
+          fill="${cor}" opacity=".55" stroke="${cor}" stroke-width="1.5"/>
+    <path d="M11 40h18v14a4 4 0 0 1-4 4H15a4 4 0 0 1-4-4V40Z" fill="${cor}" opacity=".75"/>
+  </svg>`;
+}
+
+// -------------------------------------------------------------------- desenho
 
 function desenhar() {
-  $('barra').hidden = false;
+  $('acoes').hidden = false;
+  $('btMovs').hidden = false;
 
   if (!estoque.length) {
     $('conteudo').innerHTML = `<p class="vazio">Nenhum modelo cadastrado ainda.</p>`;
     return;
   }
 
-  const zerados = estoque.filter(p => p.saldo <= 0);
-  const baixos  = estoque.filter(p => p.saldo > 0 && p.saldo < p.minimo);
-
-  let repor = '';
-  if (zerados.length) {
-    repor += `<div class="repor zerado">Acabou: <b>${zerados.map(p => escapar(p.nome)).join(', ')}</b></div>`;
+  const criticos = estoque.filter(p => nivelDe(p).cor === 'vermelho');
+  const faixa = $('urgente');
+  if (criticos.length) {
+    faixa.hidden = false;
+    faixa.innerHTML = `<strong>COMPRAR URGENTE</strong>
+      <span>${criticos.map(p => escapar(p.nome) + ' (' + p.saldo + ')').join(' &nbsp;·&nbsp; ')}</span>`;
+  } else {
+    faixa.hidden = true;
   }
-  if (baixos.length) {
-    repor += `<div class="repor">Comprar logo: <b>${baixos.map(p => escapar(p.nome) + ' (' + p.saldo + ')').join(', ')}</b></div>`;
-  }
 
-  const itens = estoque.map(p => {
-    const nivel = p.saldo <= 0 ? 'zero' : (p.saldo < p.minimo ? 'baixo' : 'ok');
-    const mudou = saldosAnteriores[p.id] !== undefined && saldosAnteriores[p.id] !== p.saldo;
-    return `<div class="item" data-nivel="${nivel}">
-      <div class="marca" style="background:${escapar(p.cor)}"></div>
-      <div class="quem">
-        <div class="nome">${escapar(p.nome)}</div>
-        ${p.apelido ? `<div class="apelido">${escapar(p.apelido)}</div>` : ''}
-      </div>
-      <div class="saldo${mudou ? ' mudou' : ''}">${p.saldo}</div>
-    </div>`;
-  }).join('');
+  const total = estoque.reduce((s, p) => s + Math.max(0, p.saldo), 0);
+  const atencao = estoque.filter(p => ['amarelo', 'laranja'].includes(nivelDe(p).cor)).length;
+  $('resumo').hidden = false;
+  $('resumo').innerHTML =
+    `<div><b>${total}</b>frascos</div>
+     <div><b>${estoque.length}</b>modelos</div>
+     <div><b>${atencao}</b>em atenção</div>
+     <div><b>${criticos.length}</b>críticos</div>`;
 
-  const total = estoque.reduce((soma, p) => soma + Math.max(0, p.saldo), 0);
-
-  $('conteudo').innerHTML = repor + `<div class="lista">${itens}</div>
-    <p class="apelido" style="margin-top:.75rem">${total} frascos em ${estoque.length} modelos</p>
-    <button class="discreta" onclick="dlgNovo.showModal()">Cadastrar um modelo novo</button>
-    ${desenharHistorico()}`;
-
-  saldosAnteriores = Object.fromEntries(estoque.map(p => [p.id, p.saldo]));
+  $('conteudo').innerHTML = `<div class="grade">${estoque.map(carta).join('')}</div>`;
+  anteriores = Object.fromEntries(estoque.map(p => [p.id, p.saldo]));
 }
 
-function desenharHistorico() {
-  if (!historico.length) return '';
-  const nomes = Object.fromEntries(estoque.map(p => [p.id, p.nome]));
-  const linhas = historico.map(m => {
-    const sinal = m.tipo === 'entrada' ? '+' : '−';
-    return `<div class="linha-hist">
-      <time>${quando(m.quando)}</time>
-      <span>${escapar(nomes[m.produto] || m.produto)}</span>
-      <span class="delta ${m.tipo}">${sinal}${m.quantidade}</span>
-    </div>`;
-  }).join('');
-  return `<div class="historico"><h2>Movimentos recentes</h2>${linhas}</div>`;
+function carta(p) {
+  const n = nivelDe(p);
+  const mudou = anteriores[p.id] !== undefined && anteriores[p.id] !== p.saldo;
+  const foto = p.imagem
+    ? `<img src="${escapar(p.imagem)}" alt="${escapar(p.nome)}" loading="lazy">`
+    : frasco(p.cor);
+
+  return `<article class="carta${mudou ? ' mudou' : ''}" data-nivel="${n.cor}">
+    <div class="foto" style="--cor:${escapar(p.cor)}">${foto}</div>
+    <div class="dados">
+      <div class="nome">${escapar(p.nome)}</div>
+      ${p.apelido ? `<div class="apelido">${escapar(p.apelido)}</div>` : ''}
+      <div class="medida"><span class="qtd">${p.saldo}</span><span class="un">un</span></div>
+      <div class="termo"><i style="width:${n.fatia}%"></i></div>
+      <div class="nivel">${n.texto}</div>
+    </div>
+  </article>`;
 }
 
-// ------------------------------------------------------------------- painéis
+// -------------------------------------------------------------------- painéis
 
 let tipoAtual = 'saida';
 
 function abrirMovimento(tipo) {
   tipoAtual = tipo;
   const saida = tipo === 'saida';
-  $('tituloMov').textContent = saida ? 'Registrar saída' : 'Registrar entrada';
+  $('tituloMov').textContent = saida ? 'REGISTRAR SAÍDA' : 'REGISTRAR ENTRADA';
   $('subtituloMov').textContent = saida
     ? 'Preencha quanto saiu de cada modelo e salve tudo de uma vez.'
     : 'Preencha quanto chegou de cada modelo e salve tudo de uma vez.';
 
   $('corpoMov').innerHTML = estoque.map(p => `
     <div class="contagem">
-      <div class="marca" style="background:${escapar(p.cor)}"></div>
+      <div class="selo" style="${p.imagem
+        ? `background-image:url('${escapar(p.imagem)}')`
+        : `background:${escapar(p.cor)};opacity:.75`}"></div>
       <div class="quem">
         <div class="nome">${escapar(p.nome)}</div>
         ${p.apelido ? `<div class="apelido">${escapar(p.apelido)}</div>` : ''}
       </div>
-      <span class="atual">tem ${p.saldo}</span>
+      <span class="tem">tem ${p.saldo}</span>
       <input type="number" min="0" inputmode="numeric" placeholder="0" data-id="${escapar(p.id)}">
     </div>`).join('');
 
@@ -359,74 +456,158 @@ function abrirMovimento(tipo) {
 
 async function salvarMovimento() {
   const itens = [...$('corpoMov').querySelectorAll('input')]
-    .map(campo => ({ id: campo.dataset.id, quantidade: Number(campo.value) }))
-    .filter(item => item.quantidade > 0);
+    .map(c => ({ id: c.dataset.id, quantidade: Number(c.value) }))
+    .filter(i => i.quantidade > 0);
 
   if (!itens.length) { alert('Preencha ao menos uma quantidade.'); return; }
 
-  const botao = $('btSalvaMov');
-  botao.disabled = true;
-  botao.textContent = 'Salvando…';
+  const bt = $('btSalvaMov');
+  bt.disabled = true; bt.textContent = 'Salvando…';
   try {
-    const resposta = await chamar('movimentar', { tipo: tipoAtual, itens });
+    const r = await chamar('movimentar', { tipo: tipoAtual, itens });
     $('dlgMovimento').close();
-    carregar(resposta.dados);
-  } catch (erro) {
-    alert(erro.message);
-  } finally {
-    botao.disabled = false;
-    botao.textContent = 'Salvar';
-  }
+    carregar(r.dados);
+  } catch (e) { alert(e.message); }
+  finally { bt.disabled = false; bt.textContent = 'Salvar'; }
 }
 
 async function salvarNovo() {
   const nome = $('novoNome').value.trim();
   if (!nome) { alert('Escreva o nome do perfume.'); return; }
 
-  const botao = $('btSalvaNovo');
-  botao.disabled = true;
+  const bt = $('btSalvaNovo');
+  bt.disabled = true;
   try {
-    const resposta = await chamar('novoProduto', {
+    const r = await chamar('novoProduto', {
       nome,
       apelido: $('novoApelido').value.trim(),
+      imagem: $('novaImagem').value.trim(),
       minimo: Number($('novoMinimo').value) || 20
     });
     $('dlgNovo').close();
-    $('novoNome').value = '';
-    $('novoApelido').value = '';
-    carregar(resposta.dados);
-  } catch (erro) {
-    alert(erro.message);
-  } finally {
-    botao.disabled = false;
-  }
+    ['novoNome', 'novoApelido', 'novaImagem'].forEach(i => $(i).value = '');
+    carregar(r.dados);
+  } catch (e) { alert(e.message); }
+  finally { bt.disabled = false; }
 }
 
-// -------------------------------------------------------------------- apoio
+function abrirMovs() {
+  if (!historico.length) {
+    $('corpoMovs').innerHTML = `<p class="vazio">Nada registrado ainda.</p>`;
+  } else {
+    const nomes = Object.fromEntries(estoque.map(p => [p.id, p.nome]));
+    let html = '', diaAtual = '';
+    historico.forEach(m => {
+      const d = new Date(m.quando);
+      const dia = d.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' });
+      if (dia !== diaAtual) { html += `<div class="dia">${dia}</div>`; diaAtual = dia; }
+      html += `<div class="mov">
+        <time>${d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</time>
+        <span>${escapar(nomes[m.produto] || m.produto)}</span>
+        <span class="quem-fez">${escapar(m.quem)}</span>
+        <span class="delta ${m.tipo}">${m.tipo === 'entrada' ? '+' : '−'}${m.quantidade}</span>
+      </div>`;
+    });
+    $('corpoMovs').innerHTML = html;
+  }
+  $('dlgMovs').showModal();
+}
 
-function escapar(texto) {
-  return String(texto ?? '').replace(/[&<>"']/g, c =>
+// ---------------------------------------------------------------------- apoio
+
+function escapar(t) {
+  return String(t ?? '').replace(/[&<>"']/g, c =>
     ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 }
 
-function quando(iso) {
-  const data = new Date(iso);
-  if (isNaN(data)) return '';
-  return data.toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
-}
+// ------------------------------------------------------------- fundo em teia
 
-function agoraCurto() {
-  return new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-}
+(function teia() {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-// ------------------------------------------------------------------ ligação
+  const tela = $('teia');
+  const ctx = tela.getContext('2d');
+  let l = 0, a = 0, pontos = [], mouse = { x: -999, y: -999 };
 
-$('btSaida').onclick    = () => abrirMovimento('saida');
-$('btEntrada').onclick  = () => abrirMovimento('entrada');
-$('btSalvaMov').onclick = salvarMovimento;
+  function medir() {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    l = tela.width = innerWidth * dpr;
+    a = tela.height = innerHeight * dpr;
+    tela.style.width = innerWidth + 'px';
+    tela.style.height = innerHeight + 'px';
+    ctx.scale(1, 1);
+
+    const quantos = innerWidth < 600 ? 26 : 52;
+    pontos = Array.from({ length: quantos }, () => ({
+      x: Math.random() * l,
+      y: Math.random() * a,
+      vx: (Math.random() - .5) * .28 * dpr,
+      vy: (Math.random() - .5) * .28 * dpr,
+      r: (Math.random() * 1.4 + .8) * dpr
+    }));
+    mouse.dpr = dpr;
+  }
+
+  function quadro() {
+    ctx.clearRect(0, 0, l, a);
+    const limite = (innerWidth < 600 ? 110 : 150) * (mouse.dpr || 1);
+
+    pontos.forEach(p => {
+      p.x += p.vx; p.y += p.vy;
+      if (p.x < 0 || p.x > l) p.vx *= -1;
+      if (p.y < 0 || p.y > a) p.vy *= -1;
+
+      const dx = p.x - mouse.x, dy = p.y - mouse.y;
+      const dist = Math.hypot(dx, dy);
+      if (dist < limite && dist > 0) {
+        p.x += (dx / dist) * .7;
+        p.y += (dy / dist) * .7;
+      }
+    });
+
+    for (let i = 0; i < pontos.length; i++) {
+      for (let j = i + 1; j < pontos.length; j++) {
+        const d = Math.hypot(pontos[i].x - pontos[j].x, pontos[i].y - pontos[j].y);
+        if (d < limite) {
+          ctx.strokeStyle = `rgba(41,168,240,${(1 - d / limite) * .22})`;
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(pontos[i].x, pontos[i].y);
+          ctx.lineTo(pontos[j].x, pontos[j].y);
+          ctx.stroke();
+        }
+      }
+      ctx.fillStyle = 'rgba(127,208,255,.55)';
+      ctx.beginPath();
+      ctx.arc(pontos[i].x, pontos[i].y, pontos[i].r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    requestAnimationFrame(quadro);
+  }
+
+  addEventListener('resize', medir);
+  addEventListener('pointermove', e => {
+    const dpr = mouse.dpr || 1;
+    mouse.x = e.clientX * dpr;
+    mouse.y = e.clientY * dpr;
+  });
+  addEventListener('pointerleave', () => { mouse.x = mouse.y = -999; });
+
+  medir();
+  quadro();
+})();
+
+// -------------------------------------------------------------------- ligação
+
+$('btSaida').onclick      = () => abrirMovimento('saida');
+$('btEntrada').onclick    = () => abrirMovimento('entrada');
+$('btNovo').onclick       = () => $('dlgNovo').showModal();
+$('btMovs').onclick       = abrirMovs;
+$('btSalvaMov').onclick   = salvarMovimento;
 $('btCancelaMov').onclick = () => $('dlgMovimento').close();
-$('btSalvaNovo').onclick = salvarNovo;
+$('btSalvaNovo').onclick  = salvarNovo;
 $('btCancelaNovo').onclick = () => $('dlgNovo').close();
+$('btFechaMovs').onclick  = () => $('dlgMovs').close();
 
 $('btSalvaCfg').onclick = () => {
   CONFIG.url = $('cfgUrl').value.trim();
