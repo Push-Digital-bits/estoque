@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#241C2B">
+<title>Domah — estoque</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --papel:#FBFAF9;
+    --tinta:#241C2B;
+    --ameixa:#4A2F52;
+    --acafrao:#B8791C;
+    --resina:#9E3B26;
+    --linha:#E6E1E6;
+    --suave:#7A6E80;
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0}
+
+  body{
+    background:var(--papel);
+    color:var(--tinta);
+    font-family:'Archivo',system-ui,sans-serif;
+    font-size:16px;
+    line-height:1.45;
+    -webkit-font-smoothing:antialiased;
+    padding-bottom:6.5rem;
+  }
+
+  .folha{max-width:38rem;margin:0 auto;padding:1.5rem 1.25rem}
+
+  /* ------------------------------------------------------------- cabeçalho */
+  header{
+    display:flex;align-items:baseline;justify-content:space-between;
+    gap:1rem;padding-bottom:1.25rem;border-bottom:2px solid var(--tinta);
+  }
+  h1{
+    font-family:'Fraunces',Georgia,serif;
+    font-weight:700;font-size:1.75rem;letter-spacing:-.01em;
+    font-variation-settings:'SOFT' 0,'WONK' 1;
+  }
+  .estado{font-size:.8125rem;color:var(--suave);text-align:right;flex-shrink:0}
+
+  /* ------------------------------------------------------------ repor logo */
+  .repor{
+    margin-top:1.25rem;padding:.875rem 1rem;
+    border-left:4px solid var(--acafrao);
+    background:#FDF6E9;
+    font-size:.9375rem;
+  }
+  .repor b{font-weight:600}
+  .repor.zerado{border-left-color:var(--resina);background:#FBEDE9}
+
+  /* ---------------------------------------------------------------- lista */
+  .lista{margin-top:1.5rem}
+  .item{
+    display:flex;align-items:center;gap:.875rem;
+    padding:.8125rem 0;border-bottom:1px solid var(--linha);
+  }
+  .marca{width:4px;height:2.25rem;border-radius:2px;flex-shrink:0}
+  .quem{flex:1;min-width:0}
+  .nome{
+    font-family:'Fraunces',Georgia,serif;
+    font-size:1.0625rem;font-weight:600;line-height:1.2;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .apelido{font-size:.8125rem;color:var(--suave)}
+  .saldo{
+    font-family:'Fraunces',Georgia,serif;
+    font-size:1.5rem;font-weight:600;font-variant-numeric:tabular-nums;
+    min-width:2.75rem;text-align:right;
+  }
+  .item[data-nivel="baixo"] .saldo{color:var(--acafrao)}
+  .item[data-nivel="zero"] .saldo{color:var(--resina)}
+  .saldo.mudou{animation:pisca .9s ease-out}
+  @keyframes pisca{
+    0%{background:#F2E4C9;box-shadow:0 0 0 .375rem #F2E4C9}
+    100%{background:transparent;box-shadow:0 0 0 .375rem transparent}
+  }
+
+  /* --------------------------------------------------------------- ações */
+  .barra{
+    position:fixed;left:0;right:0;bottom:0;
+    background:var(--papel);border-top:1px solid var(--linha);
+    padding:.75rem 1.25rem calc(.75rem + env(safe-area-inset-bottom));
+  }
+  .barra .folha{padding:0;display:flex;gap:.625rem}
+  button{
+    font-family:'Archivo',sans-serif;font-size:1rem;font-weight:500;
+    border:none;border-radius:.375rem;padding:.8125rem 1rem;cursor:pointer;
+  }
+  .primaria{flex:1;background:var(--ameixa);color:#fff}
+  .secundaria{flex:1;background:transparent;color:var(--ameixa);box-shadow:inset 0 0 0 1.5px var(--ameixa)}
+  .discreta{background:transparent;color:var(--suave);text-decoration:underline;padding:.5rem 0;font-size:.875rem}
+  button:disabled{opacity:.45;cursor:default}
+  button:focus-visible,input:focus-visible{outline:2.5px solid var(--ameixa);outline-offset:2px}
+
+  /* ------------------------------------------------------------- painéis */
+  dialog{
+    border:none;padding:0;background:var(--papel);color:var(--tinta);
+    width:min(38rem,100%);max-height:88vh;
+    margin:auto auto 0;border-radius:.75rem .75rem 0 0;
+  }
+  dialog::backdrop{background:rgba(36,28,43,.45)}
+  .cabeca{
+    position:sticky;top:0;background:var(--papel);z-index:1;
+    padding:1.25rem 1.25rem .75rem;border-bottom:1px solid var(--linha);
+  }
+  .cabeca h2{
+    font-family:'Fraunces',Georgia,serif;font-size:1.375rem;font-weight:600;
+  }
+  .cabeca p{font-size:.875rem;color:var(--suave);margin-top:.125rem}
+  .corpo{padding:.25rem 1.25rem 1.25rem;overflow-y:auto}
+  .pe{
+    position:sticky;bottom:0;background:var(--papel);
+    border-top:1px solid var(--linha);
+    padding:.875rem 1.25rem calc(.875rem + env(safe-area-inset-bottom));
+    display:flex;gap:.625rem;
+  }
+
+  .contagem{
+    display:flex;align-items:center;gap:.875rem;
+    padding:.6875rem 0;border-bottom:1px solid var(--linha);
+  }
+  .contagem .quem{flex:1}
+  .contagem .atual{font-size:.8125rem;color:var(--suave);min-width:3.5rem;text-align:right}
+  input[type="number"],input[type="text"],input[type="url"],input[type="password"]{
+    font-family:'Archivo',sans-serif;font-size:1rem;color:var(--tinta);
+    background:#fff;border:1.5px solid var(--linha);border-radius:.375rem;
+    padding:.5rem .625rem;
+  }
+  input[type="number"]{width:4.5rem;text-align:center;font-variant-numeric:tabular-nums}
+  input[type="number"]:not(:placeholder-shown){border-color:var(--ameixa);font-weight:600}
+
+  .campo{display:block;margin-top:1rem}
+  .campo span{display:block;font-size:.875rem;color:var(--suave);margin-bottom:.3125rem}
+  .campo input{width:100%}
+
+  /* ------------------------------------------------------------ histórico */
+  .historico{margin-top:2.5rem}
+  .historico h2{
+    font-family:'Fraunces',Georgia,serif;font-size:1.125rem;font-weight:600;
+    padding-bottom:.5rem;border-bottom:1px solid var(--linha);
+  }
+  .linha-hist{
+    display:flex;gap:.75rem;padding:.5rem 0;font-size:.875rem;
+    border-bottom:1px solid var(--linha);
+  }
+  .linha-hist time{color:var(--suave);min-width:6.5rem;flex-shrink:0}
+  .linha-hist .delta{font-weight:600;font-variant-numeric:tabular-nums;margin-left:auto}
+  .linha-hist .delta.entrada{color:var(--ameixa)}
+  .linha-hist .delta.saida{color:var(--resina)}
+
+  .aviso{
+    margin-top:1rem;padding:.75rem .875rem;font-size:.9375rem;
+    border-left:4px solid var(--resina);background:#FBEDE9;
+  }
+  .vazio{padding:2.5rem 0;color:var(--suave);text-align:center}
+
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<!--
+  ANTES DE SUBIR PARA O GITHUB, preencha as duas linhas abaixo, no script.
+  Enquanto estiverem em branco, o painel pede os dados na tela.
+-->
+
+<div class="folha">
+  <header>
+    <h1>Estoque Domah</h1>
+    <div class="estado" id="estado">carregando</div>
+  </header>
+  <div id="conteudo">
+    <p class="vazio">Buscando o estoque…</p>
+  </div>
+</div>
+
+<div class="barra" id="barra" hidden>
+  <div class="folha">
+    <button class="secundaria" id="btEntrada">Registrar entrada</button>
+    <button class="primaria" id="btSaida">Registrar saída</button>
+  </div>
+</div>
+
+<dialog id="dlgMovimento">
+  <div class="cabeca">
+    <h2 id="tituloMov">Registrar saída</h2>
+    <p id="subtituloMov">Preencha quanto saiu de cada modelo e salve tudo de uma vez.</p>
+  </div>
+  <div class="corpo" id="corpoMov"></div>
+  <div class="pe">
+    <button class="secundaria" id="btCancelaMov">Cancelar</button>
+    <button class="primaria" id="btSalvaMov">Salvar</button>
+  </div>
+</dialog>
+
+<dialog id="dlgNovo">
+  <div class="cabeca">
+    <h2>Cadastrar modelo</h2>
+    <p>Ele aparece nas listas de entrada e saída na hora.</p>
+  </div>
+  <div class="corpo">
+    <label class="campo"><span>Nome do perfume</span><input type="text" id="novoNome" placeholder="Lattafa Khamrah"></label>
+    <label class="campo"><span>Apelido, do jeito que vocês chamam</span><input type="text" id="novoApelido" placeholder="khamrah"></label>
+    <label class="campo"><span>Avisar quando cair abaixo de</span><input type="number" id="novoMinimo" value="20" min="0"></label>
+  </div>
+  <div class="pe">
+    <button class="secundaria" id="btCancelaNovo">Cancelar</button>
+    <button class="primaria" id="btSalvaNovo">Cadastrar</button>
+  </div>
+</dialog>
+
+<dialog id="dlgConfig">
+  <div class="cabeca">
+    <h2>Conectar à planilha</h2>
+    <p>Cole o endereço que o Apps Script gerou ao publicar.</p>
+  </div>
+  <div class="corpo">
+    <label class="campo"><span>Endereço do aplicativo web</span><input type="url" id="cfgUrl" placeholder="https://script.google.com/macros/s/…/exec"></label>
+    <label class="campo"><span>Senha definida no código</span><input type="password" id="cfgSenha"></label>
+  </div>
+  <div class="pe">
+    <button class="primaria" id="btSalvaCfg">Conectar</button>
+  </div>
+</dialog>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════════════
+//  PREENCHA AQUI ANTES DE SUBIR PARA O GITHUB
+// ═══════════════════════════════════════════════════════════════════════════
+const CONFIG = {
+  url: 'https://script.google.com/macros/s/AKfycbwDLVk-xPkOyvrYfjjG_tSyKvo2fP9JZRm9kx5aFLKsCPn4TtON5ALR18C8NVefC0UjAg/exec', 
+  senha: '060927',
+  quem: 'Mateus' 
+};
+// ═══════════════════════════════════════════════════════════════════════════
+
+const $ = id => document.getElementById(id);
+let estoque = [];
+let historico = [];
+let saldosAnteriores = {};
+
+// ------------------------------------------------------------------ conversa
+
+async function chamar(acao, extras = {}) {
+  const resposta = await fetch(CONFIG.url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify({ acao, senha: CONFIG.senha, quem: CONFIG.quem, ...extras })
+  });
+  const dados = await resposta.json();
+  if (!dados.ok) throw new Error(dados.erro || 'A planilha recusou o pedido.');
+  return dados;
+}
+
+async function carregar(dadosProntos) {
+  try {
+    const dados = dadosProntos || (await chamar('estoque')).dados;
+    estoque = dados.produtos;
+    historico = dados.movimentos;
+    desenhar();
+    $('estado').textContent = 'atualizado ' + agoraCurto();
+  } catch (erro) {
+    $('conteudo').innerHTML = `<div class="aviso">${escapar(erro.message)}</div>
+      <button class="discreta" onclick="dlgConfig.showModal()">Rever a conexão</button>`;
+    $('estado').textContent = 'sem conexão';
+  }
+}
+
+// ------------------------------------------------------------------- desenho
+
+function desenhar() {
+  $('barra').hidden = false;
+
+  if (!estoque.length) {
+    $('conteudo').innerHTML = `<p class="vazio">Nenhum modelo cadastrado ainda.</p>`;
+    return;
+  }
+
+  const zerados = estoque.filter(p => p.saldo <= 0);
+  const baixos  = estoque.filter(p => p.saldo > 0 && p.saldo < p.minimo);
+
+  let repor = '';
+  if (zerados.length) {
+    repor += `<div class="repor zerado">Acabou: <b>${zerados.map(p => escapar(p.nome)).join(', ')}</b></div>`;
+  }
+  if (baixos.length) {
+    repor += `<div class="repor">Comprar logo: <b>${baixos.map(p => escapar(p.nome) + ' (' + p.saldo + ')').join(', ')}</b></div>`;
+  }
+
+  const itens = estoque.map(p => {
+    const nivel = p.saldo <= 0 ? 'zero' : (p.saldo < p.minimo ? 'baixo' : 'ok');
+    const mudou = saldosAnteriores[p.id] !== undefined && saldosAnteriores[p.id] !== p.saldo;
+    return `<div class="item" data-nivel="${nivel}">
+      <div class="marca" style="background:${escapar(p.cor)}"></div>
+      <div class="quem">
+        <div class="nome">${escapar(p.nome)}</div>
+        ${p.apelido ? `<div class="apelido">${escapar(p.apelido)}</div>` : ''}
+      </div>
+      <div class="saldo${mudou ? ' mudou' : ''}">${p.saldo}</div>
+    </div>`;
+  }).join('');
+
+  const total = estoque.reduce((soma, p) => soma + Math.max(0, p.saldo), 0);
+
+  $('conteudo').innerHTML = repor + `<div class="lista">${itens}</div>
+    <p class="apelido" style="margin-top:.75rem">${total} frascos em ${estoque.length} modelos</p>
+    <button class="discreta" onclick="dlgNovo.showModal()">Cadastrar um modelo novo</button>
+    ${desenharHistorico()}`;
+
+  saldosAnteriores = Object.fromEntries(estoque.map(p => [p.id, p.saldo]));
+}
+
+function desenharHistorico() {
+  if (!historico.length) return '';
+  const nomes = Object.fromEntries(estoque.map(p => [p.id, p.nome]));
+  const linhas = historico.map(m => {
+    const sinal = m.tipo === 'entrada' ? '+' : '−';
+    return `<div class="linha-hist">
+      <time>${quando(m.quando)}</time>
+      <span>${escapar(nomes[m.produto] || m.produto)}</span>
+      <span class="delta ${m.tipo}">${sinal}${m.quantidade}</span>
+    </div>`;
+  }).join('');
+  return `<div class="historico"><h2>Movimentos recentes</h2>${linhas}</div>`;
+}
+
+// ------------------------------------------------------------------- painéis
+
+let tipoAtual = 'saida';
+
+function abrirMovimento(tipo) {
+  tipoAtual = tipo;
+  const saida = tipo === 'saida';
+  $('tituloMov').textContent = saida ? 'Registrar saída' : 'Registrar entrada';
+  $('subtituloMov').textContent = saida
+    ? 'Preencha quanto saiu de cada modelo e salve tudo de uma vez.'
+    : 'Preencha quanto chegou de cada modelo e salve tudo de uma vez.';
+
+  $('corpoMov').innerHTML = estoque.map(p => `
+    <div class="contagem">
+      <div class="marca" style="background:${escapar(p.cor)}"></div>
+      <div class="quem">
+        <div class="nome">${escapar(p.nome)}</div>
+        ${p.apelido ? `<div class="apelido">${escapar(p.apelido)}</div>` : ''}
+      </div>
+      <span class="atual">tem ${p.saldo}</span>
+      <input type="number" min="0" inputmode="numeric" placeholder="0" data-id="${escapar(p.id)}">
+    </div>`).join('');
+
+  $('dlgMovimento').showModal();
+}
+
+async function salvarMovimento() {
+  const itens = [...$('corpoMov').querySelectorAll('input')]
+    .map(campo => ({ id: campo.dataset.id, quantidade: Number(campo.value) }))
+    .filter(item => item.quantidade > 0);
+
+  if (!itens.length) { alert('Preencha ao menos uma quantidade.'); return; }
+
+  const botao = $('btSalvaMov');
+  botao.disabled = true;
+  botao.textContent = 'Salvando…';
+  try {
+    const resposta = await chamar('movimentar', { tipo: tipoAtual, itens });
+    $('dlgMovimento').close();
+    carregar(resposta.dados);
+  } catch (erro) {
+    alert(erro.message);
+  } finally {
+    botao.disabled = false;
+    botao.textContent = 'Salvar';
+  }
+}
+
+async function salvarNovo() {
+  const nome = $('novoNome').value.trim();
+  if (!nome) { alert('Escreva o nome do perfume.'); return; }
+
+  const botao = $('btSalvaNovo');
+  botao.disabled = true;
+  try {
+    const resposta = await chamar('novoProduto', {
+      nome,
+      apelido: $('novoApelido').value.trim(),
+      minimo: Number($('novoMinimo').value) || 20
+    });
+    $('dlgNovo').close();
+    $('novoNome').value = '';
+    $('novoApelido').value = '';
+    carregar(resposta.dados);
+  } catch (erro) {
+    alert(erro.message);
+  } finally {
+    botao.disabled = false;
+  }
+}
+
+// -------------------------------------------------------------------- apoio
+
+function escapar(texto) {
+  return String(texto ?? '').replace(/[&<>"']/g, c =>
+    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+}
+
+function quando(iso) {
+  const data = new Date(iso);
+  if (isNaN(data)) return '';
+  return data.toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+}
+
+function agoraCurto() {
+  return new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+}
+
+// ------------------------------------------------------------------ ligação
+
+$('btSaida').onclick    = () => abrirMovimento('saida');
+$('btEntrada').onclick  = () => abrirMovimento('entrada');
+$('btSalvaMov').onclick = salvarMovimento;
+$('btCancelaMov').onclick = () => $('dlgMovimento').close();
+$('btSalvaNovo').onclick = salvarNovo;
+$('btCancelaNovo').onclick = () => $('dlgNovo').close();
+
+$('btSalvaCfg').onclick = () => {
+  CONFIG.url = $('cfgUrl').value.trim();
+  CONFIG.senha = $('cfgSenha').value;
+  if (!CONFIG.url) { alert('Cole o endereço do aplicativo web.'); return; }
+  $('dlgConfig').close();
+  carregar();
+};
+
+if (CONFIG.url && CONFIG.senha) {
+  carregar();
+} else {
+  $('estado').textContent = 'não conectado';
+  $('conteudo').innerHTML = '<p class="vazio">Falta conectar o painel à planilha.</p>';
+  $('dlgConfig').showModal();
+}
+</script>
+</body>
+</html>
